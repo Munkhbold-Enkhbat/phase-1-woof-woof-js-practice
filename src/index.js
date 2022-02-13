@@ -24,6 +24,7 @@ function renderPupInfo(obj) {
   let whichDog = 'Good Dog!'
   if(!obj.isGoodDog) {
     whichDog = 'Bad Dog!'
+    obj.isGoodDog = false
   }
   card.innerHTML = `
   <img src='${obj.image}'/>
@@ -34,12 +35,27 @@ function renderPupInfo(obj) {
   button.addEventListener('click', () => {
     if(whichDog === 'Good Dog!') {
       whichDog = 'Bad Dog!'
+      obj.isGoodDog = false
     } else {
       whichDog = 'Good Dog!'
+      obj.isGoodDog = true
     }
     button.innerText = whichDog
+    updatePuppyOnDB(obj)
     card.appendChild(button)
   })
   document.querySelector('div#dog-info').appendChild(card)
+}
+
+function updatePuppyOnDB(obj) {
+  fetch(`http://localhost:3000/pups/${obj.id}`, {
+    method: 'PATCH', 
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(obj) 
+  })
+  .then(res => res.json())
+  .then(obj => console.log(obj))
 }
 
