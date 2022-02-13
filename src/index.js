@@ -1,24 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
-  getAllPups()
+  getAllDogs()
+  handleFilterGoodDogButton()
 })
 
-function getAllPups() {
+function getAllDogs() {
   fetch('http://localhost:3000/pups')
   .then(res => res.json())
-  .then(pups => pups.forEach(pup => renderPupNames(pup)))
+  .then(dogs => dogs.forEach(dog => renderDogNames(dog)))
 }
 
-function renderPupNames(obj) {
+function renderDogNames(obj) {
   const span = document.createElement('span')
   span.textContent = obj.name
   span.addEventListener('click', () => {
     document.querySelector('div#dog-info').innerText = ''
-    renderPupInfo(obj)
+    renderDogInfo(obj)
   })
   document.querySelector('div#dog-bar').appendChild(span)
 }
 
-function renderPupInfo(obj) {
+function renderDogInfo(obj) {
   const card = document.createElement('div')
   card.id = 'dog-info' 
   let whichDog = 'Good Dog!'
@@ -41,13 +42,13 @@ function renderPupInfo(obj) {
       obj.isGoodDog = true
     }
     button.innerText = whichDog
-    updatePuppyOnDB(obj)
+    updateDogOnDB(obj)
     card.appendChild(button)
   })
   document.querySelector('div#dog-info').appendChild(card)
 }
 
-function updatePuppyOnDB(obj) {
+function updateDogOnDB(obj) {
   fetch(`http://localhost:3000/pups/${obj.id}`, {
     method: 'PATCH', 
     headers: {
@@ -59,3 +60,22 @@ function updatePuppyOnDB(obj) {
   .then(obj => console.log(obj))
 }
 
+function handleFilterGoodDogButton() {
+  const dogBar = document.querySelector('div#dog-bar')
+  document.querySelector('button#good-dog-filter').addEventListener('click', (e) => {
+    if(e.target.innerText === 'Filter good dogs: ON') {
+      dogBar.innerText = ''
+      e.target.innerText = 'Filter good dogs: OFF'
+      getAllDogs()
+    } else {
+      e.target.innerHTML = 'Filter good dogs: ON'
+      dogBar.innerText = ''
+      fetch('http://localhost:3000/pups')
+      .then(res => res.json())
+      .then(dogs => {
+        let goodDogs = dogs.filter(dog => dog.isGoodDog === true)
+        goodDogs.forEach(dog => renderDogNames(dog))
+      })
+    }    
+  })
+}
